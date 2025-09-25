@@ -259,7 +259,7 @@ not on every render.
 ## Issues
 
 If you encounter any issue,
-please open an issue [here](https://github.com/HichemTab-tech/react-ctx-selector/issues).
+please open an issue [here](https://github.com/HichemTab-tech/react-context-selector/issues).
 
 ## License
 
