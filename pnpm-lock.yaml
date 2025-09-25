@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      react-exposed-states:
-        specifier: ^1.0.0
-        version: 1.0.0
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.1.13
@@ -36,6 +32,9 @@ importers:
       react-dom:
         specifier: ^19.1.1
         version: 19.1.1(react@19.1.1)
+      react-exposed-states:
+        specifier: ^1.0.0
+        version: 1.0.0
       react-fast-compare:
         specifier: ^3.2.2
         version: 3.2.2
