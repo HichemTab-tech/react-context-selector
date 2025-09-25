@@ -179,6 +179,64 @@ const entireContext = useContext(MyContext);
 
 ---
 
+## 🎯 Best Practices
+
+### Separate Provider State to Prevent Children Re-renders
+
+**Important:** To maximize performance and prevent unnecessary re-renders of all children, it's recommended to separate the Provider component and its state management into different components.
+
+#### ❌ Not Recommended - Provider with inline state
+
+```javascript
+function App() {
+  const [state, setState] = useState({ name: 'John', age: 25 });
+  
+  return (
+    <MyContext.Provider value={[state, setState]}>
+      <ChildComponent1 />
+      <ChildComponent2 />
+      <ChildComponent3 />
+      {/* All these children will re-render when App re-renders */}
+    </MyContext.Provider>
+  );
+}
+```
+
+#### ✅ Recommended - Separated Provider Component
+
+```javascript
+// Separate Provider component
+function MyProvider({ children }) {
+  const [state, setState] = useState({ name: 'John', age: 25 });
+  
+  return (
+    <MyContext.Provider value={[state, setState]}>
+      {children}
+    </MyContext.Provider>
+  );
+}
+
+// Main App component
+function App() {
+  // This component can re-render without affecting the context children
+  return (
+    <MyProvider>
+      <ChildComponent1 />
+      <ChildComponent2 />
+      <ChildComponent3 />
+      {/* These children won't re-render when App re-renders */}
+    </MyProvider>
+  );
+}
+```
+
+**Why this matters:**
+- When the Provider's state is managed in the same component as other UI logic, any re-render of that component will also re-render all Provider children
+- By separating the Provider into its own component, you isolate the context state management from other rendering triggers
+- This pattern works perfectly with `useContextSelector` to provide maximum performance optimization
+
+---
+
 ## ❓ FAQ
 
 **How is this different from use-context-selector?**
