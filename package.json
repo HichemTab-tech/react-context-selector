@@ -12,7 +12,7 @@
     "react-package",
     "react-library"
   ],
-  "main": "dist/main.js",
+  "main": "dist/main.min.js",
   "module": "dist/main.esm.js",
   "types": "dist/index.d.ts",
   "scripts": {
@@ -35,11 +35,13 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.13",
     "@types/node": "^24.5.2",
-    "@types/react": "^19.1.13",
+    "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.3",
+    "@welldone-software/why-did-you-render": "^10.0.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-fast-compare": "^3.2.2",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",
     "vite": "^7.1.7",
@@ -49,6 +51,6 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "classnames": "^2.5.1"
+    "react-exposed-states": "^1.0.0"
   }
 }

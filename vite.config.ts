@@ -34,6 +34,7 @@ export default defineConfig({
             }
         },
         terserOptions: {
+            // @ts-ignore
             format: {
                 comments: false
             }
@@ -45,10 +46,10 @@ export default defineConfig({
         banner(bannerContent),
         cssInjectedByJsPlugin(),
         dts({
-            entryRoot: 'src', // Base folder for type generation
-            outDir: 'dist', // Ensures types go into `dist/`
-            insertTypesEntry: true, // Adds the `types` field in package.json
-            exclude: ['node_modules', 'dist'], // Exclude unnecessary files
+            entryRoot: 'src',
+            outDir: 'dist',
+            insertTypesEntry: true,
+            exclude: ['node_modules', 'dist'],
         })
 
     ]
