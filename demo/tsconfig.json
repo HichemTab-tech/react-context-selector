@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "%PACKAGE-NAME%": ["../src"]
+      "react-ctx-selector": ["../src"]
     }
   },
   "include": [
