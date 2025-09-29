@@ -52,19 +52,27 @@ export function createContext<V>(initialValue: V): MyContextType<V> {
     } as const;
 }
 
+export type NoContextCallback = () => void;
+
 // noinspection JSUnusedGlobalSymbols
-export function useContext<V>(context: MyContextType<V>) {
-    return useContextSelector(context);
+export function useContext<V>(context: MyContextType<V>, noContextCallback?: NoContextCallback) {
+    return useContextSelector(context, undefined, isEqual, noContextCallback);
 }
 
 export function useContextSelector<V, T = V>(
     context: MyContextType<V>,
     selector?: (value: V) => T,
-    compareUsing: (a: T, b: T) => boolean = isEqual
+    compareUsing: (a: T, b: T) => boolean = isEqual,
+    noContextCallback?: NoContextCallback
 ): T {
     const myContext = React.useContext(context.MyContext);
+    if (!noContextCallback) {
+        noContextCallback = () => {
+            throw new Error("useContextSelector must be used inside Context.Provider")
+        };
+    }
     if (!myContext) {
-        throw new Error("useContextSelector must be used inside Context.Provider");
+        noContextCallback();
     }
     if (!selector) selector = ((x) => x as unknown as T);
     const cachedValue = useRef<T>(selector(myContext.get()));
