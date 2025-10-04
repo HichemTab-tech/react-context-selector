@@ -1,6 +1,6 @@
 {
   "name": "react-ctx-selector",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "type": "module",
   "description": "A lightweight React utility that provides a real context selector hook. Unlike useContext, it lets components subscribe to only the part of context they need, avoiding unnecessary re-renders for better performance.",
   "keywords": [
