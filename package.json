@@ -15,6 +15,12 @@
   "main": "dist/main.min.js",
   "module": "dist/main.esm.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/main.esm.js",
+      "require": "./dist/main.min.js"
+    }
+  },
   "scripts": {
     "build": "vite build",
     "bump": "node scripts/bumper.js",
