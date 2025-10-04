@@ -9,3 +9,5 @@ demo/
 tests
 .run
 .idea
+scripts
+vite.config.ts
