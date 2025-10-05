@@ -76,13 +76,13 @@ export function useContextSelector<V, T = V>(
     }
     if (!selector) selector = ((x) => x as unknown as T);
     const cachedValue = useRef<T>(selector(myContext.get()));
-    const getter = useCallback(() => {
+    const getter = () => {
         const value = myContext.get();
         if (compareUsing(selector(value), cachedValue.current)) return cachedValue.current;
         cachedValue.current = selector(value);
 
         return cachedValue.current;
-    }, []);
+    };
     const serverGetter = useCallback(() => cachedValue.current, []);
     return useSyncExternalStore(myContext.subscribe, getter, serverGetter)
 }
