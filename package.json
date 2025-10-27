@@ -56,7 +56,7 @@
     "vite-plugin-banner": "^0.8.1",
     "vite-plugin-css-injected-by-js": "^3.5.2",
     "vite-plugin-dts": "^4.5.4",
-    "vitest": "^3.2.4",
+    "vitest": "^4.0.4",
     "react-exposed-states": "^1.0.0"
   }
 }
