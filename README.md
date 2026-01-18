@@ -171,6 +171,42 @@ import { useContext } from 'react-ctx-selector';
 const entireContext = useContext(MyContext);
 ```
 
+### Function `useContextStore(context, noContextCallback)`
+
+Returns the context store instance. This is useful when you need to interact with the store directly, for example, to set a value from a component that doesn't need to subscribe to changes. While this can be achieved by using React's normal `useContext` on the `MyContext` object, `useContextStore` provides a more direct and explicit way to access the store.
+
+**Parameters:**
+
+| Parameter           | Type               | Description                                                                                          |
+|---------------------|--------------------|------------------------------------------------------------------------------------------------------|
+| `context`           | `MyContextType<V>` | The context created by `createContext`.                                                              |
+| `noContextCallback` | `() => void`       | (Optional) A callback function that is called when the hook is used outside of the context provider. |
+
+**Returns:**
+
+The context store, which is an object with the following methods:
+- `get(): V`: Returns the current value of the context.
+- `set(newValue: V | ((prev: V) => V))`: Sets the value of the context. It can take a new value or a function that receives the previous value and returns the new one.
+- `subscribe(callback: () => void): () => void`: Subscribes a listener to the store. Returns a function to unsubscribe.
+
+**Example:**
+
+```javascript
+import { createContext, useContextStore } from 'react-ctx-selector';
+
+const MyContext = createContext({ name: 'John', age: 25 });
+
+function AgeChanger() {
+  const store = useContextStore(MyContext);
+
+  return (
+    <button onClick={() => store.set(prev => ({...prev, age: prev.age + 1}))}>
+      Increment Age
+    </button>
+  );
+}
+```
+
 ### `quickContextFactory<ContextDataType>()`
 
 A utility that provides a `create` method to simplify the creation of a context, provider, and hook. It's a quick way to set up a context without boilerplate, with type inference for the returned objects.
@@ -193,10 +229,12 @@ An object with a `create` method.
     - `QuickContext`: The created React context.
     - `QuickContextProvider`: A provider component.
     - `useQuickContext`: A hook to access the context value.
+    - `useQuickContextStore`: A hook to access the context store.
 - If `name` **is** provided (e.g., `'Shared'`), an object containing:
     - `SharedContext`: The created React context.
     - `SharedContextProvider`: A provider component.
     - `useSharedContext`: A hook to access the context value.
+    - `useSharedContextStore`: A hook to access the context store.
 
 **Example (Default):**
 
@@ -204,7 +242,7 @@ An object with a `create` method.
 import { quickContextFactory } from 'react-ctx-selector';
 
 // 1. Create the context
-const { QuickContextProvider, useQuickContext } = quickContextFactory<{
+const { QuickContextProvider, useQuickContext, useQuickContextStore } = quickContextFactory<{
   user: { name: string; age: number };
   theme: string;
 }>().create();
@@ -219,6 +257,7 @@ function App() {
   return (
     <QuickContextProvider data={data}>
       <UserProfile />
+      <ThemeChanger />
     </QuickContextProvider>
   );
 }
@@ -228,6 +267,11 @@ function UserProfile() {
   const user = useQuickContext((state) => state.user);
   return <div>Hello, {user.name}!</div>;
 }
+
+function ThemeChanger() {
+    const store = useQuickContextStore();
+    return <button onClick={() => store.set(s => ({...s, theme: s.theme === 'dark' ? 'light' : 'dark'}))}>Toggle Theme</button>
+}
 ```
 
 **Example (With Name):**
@@ -236,7 +280,7 @@ function UserProfile() {
 import { quickContextFactory } from 'react-ctx-selector';
 
 // 1. Create the context with a name
-const { SharedContextProvider, useSharedContext } = quickContextFactory<{
+const { SharedContextProvider, useSharedContext, useSharedContextStore } = quickContextFactory<{
   user: { name: string; age: number };
 }>().create({ name: 'Shared' });
 
@@ -247,6 +291,7 @@ function App() {
   return (
     <SharedContextProvider data={data}>
       <UserProfile />
+      <AgeChanger />
     </SharedContextProvider>
   );
 }
@@ -255,6 +300,11 @@ function App() {
 function UserProfile() {
   const user = useSharedContext((state) => state.user);
   return <div>Hello, {user.name}!</div>;
+}
+
+function AgeChanger() {
+    const store = useSharedContextStore();
+    return <button onClick={() => store.set(s => ({...s, user: {...s.user, age: s.user.age + 1}}))}>Increment Age</button>
 }
 ```
 
