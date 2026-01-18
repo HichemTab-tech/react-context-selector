@@ -4,8 +4,6 @@
 
 **Why choose this over use-context-selector?** This package provides true re-render prevention by using deep equality comparison (react-fast-compare) instead of Object.is, ensuring components only re-render when their selected data actually changes.
 
----
-
 ## Getting Started
 
 Start by installing the package via your preferred package manager:
@@ -19,8 +17,6 @@ or, if using pnpm:
 ```sh
 pnpm add react-ctx-selector
 ```
-
----
 
 ## ☕ 60-Second TL;DR
 
@@ -88,8 +84,6 @@ export default function Demo() {
   )
 }
 ```
-
----
 
 ## API Reference
 
@@ -177,7 +171,92 @@ import { useContext } from 'react-ctx-selector';
 const entireContext = useContext(MyContext);
 ```
 
----
+### `quickContextFactory<ContextDataType>()`
+
+A utility that provides a `create` method to simplify the creation of a context, provider, and hook. It's a quick way to set up a context without boilerplate, with type inference for the returned objects.
+
+**Returns:**
+
+An object with a `create` method.
+
+#### `create(options?)`
+
+**Parameters:**
+
+| Parameter | Type                | Description                                                                                                                                                              |
+|-----------|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `options` | `{ name?: string }` | Optional configuration. `name` is used to generate the names of the returned context, provider, and hook (e.g., `name: 'Shared'` results in `SharedContext`, `SharedContextProvider`, and `useSharedContext`). |
+
+**Returns:**
+
+- If `name` is **not** provided, an object containing:
+    - `QuickContext`: The created React context.
+    - `QuickContextProvider`: A provider component.
+    - `useQuickContext`: A hook to access the context value.
+- If `name` **is** provided (e.g., `'Shared'`), an object containing:
+    - `SharedContext`: The created React context.
+    - `SharedContextProvider`: A provider component.
+    - `useSharedContext`: A hook to access the context value.
+
+**Example (Default):**
+
+```tsx
+import { quickContextFactory } from 'react-ctx-selector';
+
+// 1. Create the context
+const { QuickContextProvider, useQuickContext } = quickContextFactory<{
+  user: { name: string; age: number };
+  theme: string;
+}>().create();
+
+// 2. Use the provider
+function App() {
+  const data = {
+    user: { name: 'Hichem', age: 25 },
+    theme: 'dark',
+  };
+
+  return (
+    <QuickContextProvider data={data}>
+      <UserProfile />
+    </QuickContextProvider>
+  );
+}
+
+// 3. Consume context with the hook
+function UserProfile() {
+  const user = useQuickContext((state) => state.user);
+  return <div>Hello, {user.name}!</div>;
+}
+```
+
+**Example (With Name):**
+
+```tsx
+import { quickContextFactory } from 'react-ctx-selector';
+
+// 1. Create the context with a name
+const { SharedContextProvider, useSharedContext } = quickContextFactory<{
+  user: { name: string; age: number };
+}>().create({ name: 'Shared' });
+
+// 2. Use the provider
+function App() {
+  const data = { user: { name: 'Hichem', age: 25 } };
+
+  return (
+    <SharedContextProvider data={data}>
+      <UserProfile />
+    </SharedContextProvider>
+  );
+}
+
+// 3. Consume context with the named hook
+function UserProfile() {
+  const user = useSharedContext((state) => state.user);
+  return <div>Hello, {user.name}!</div>;
+}
+```
 
 ## 🎯 Best Practices
 
@@ -234,8 +313,6 @@ function App() {
 - When the Provider's state is managed in the same component as other UI logic, any re-render of that component will also re-render all Provider children
 - By separating the Provider into its own component, you isolate the context state management from other rendering triggers
 - This pattern works perfectly with `useContextSelector` to provide maximum performance optimization
-
----
 
 ## ❓ FAQ
 
