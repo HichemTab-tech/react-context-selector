@@ -1,20 +1,36 @@
 import {createContext, type MyContextType as Context, useContextSelector} from "./context-selector";
-import type {PropsWithChildren} from "react";
+import {type PropsWithChildren} from "react";
 
 interface QuickContextProviderProps<ContextDataType> {
     data: ContextDataType
 }
 
-export function createQuickContext<ContextDataType>(options?: {
-    name?: string
-}) {
+type OptionNameContexted<T extends string> = `${T}Context`;
+type OptionName<T extends string> = T extends `${string}Context` ? never : OptionNameContexted<T>;
 
-    if (typeof options?.name !== "undefined" && typeof options?.name !== "string") throw new Error(
-        `createQuickContext: name must be a string`
-    )
+interface Options<Name extends string>{
+    name?: Name
+}
 
-    let name = options?.name ?? 'QuickContext';
-    name = name.charAt(0).toUpperCase() + name.slice(1);
+export function quickContextFactory<ContextDataType>() {
+    return {
+        create: function <Name extends string>(options?: Options<Capitalize<OptionName<Name>>>) {
+            // noinspection SuspiciousTypeOfGuard
+            if (typeof options?.name !== "undefined" && typeof options?.name !== "string") throw new Error(
+                `createQuickContext: name must be a string`
+            )
+
+            const name = (options?.name ?? 'Quick')+"Context";
+
+            return createQuickContext<ContextDataType, Capitalize<Name>>({
+                ...(options??{}),
+                name: name.charAt(0).toUpperCase() + name.slice(1) as Capitalize<Name>
+            });
+        }
+    }
+}
+
+function createQuickContext<ContextDataType, Name extends string>(options: Required<Options<Name>>) {
 
     const QuickContext = createContext<ContextDataType>(undefined!);
     const QuickContextProvider = ({children, data}: PropsWithChildren<QuickContextProviderProps<ContextDataType>>) => {
@@ -33,11 +49,21 @@ export function createQuickContext<ContextDataType>(options?: {
             selector ?? ((value) => value as unknown as T),
             undefined,
             () => {
-                throw new Error(`use${name} must be used within a ${name}Provider`);
+                throw new Error(`use${options.name} must be used within a ${options.name}Provider`);
             }
         );
         return context as T extends ContextDataType ? ContextDataType : T;
     }
 
-    return {QuickContext, QuickContextProvider, useQuickContext} as const;
+    return {
+        [options.name]: QuickContext as Context<ContextDataType>,
+        [options.name+"Provider"]: QuickContextProvider,
+        ["use"+options.name]: useQuickContext
+    } as {
+        [K in Name]: typeof QuickContext
+    } & {
+        [K in `${Name}Provider`]: typeof QuickContextProvider
+    } & {
+        [K in `use${Name}`]: typeof useQuickContext
+    };
 }
