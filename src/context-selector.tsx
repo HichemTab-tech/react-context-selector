@@ -10,7 +10,7 @@ import isEqual from "react-fast-compare";
 
 type ValueOrSetter<T> = T | ((prev: T) => T);
 
-type StoreType<T> = ReturnType<typeof createContextStore<T>>;
+export type StoreType<T> = ReturnType<typeof createContextStore<T>>;
 
 function createContextStore<T>(initialValue: T) {
     let value = initialValue;
