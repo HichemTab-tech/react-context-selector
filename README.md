@@ -4,8 +4,6 @@
 
 **Why choose this over use-context-selector?** This package provides true re-render prevention by using deep equality comparison (react-fast-compare) instead of Object.is, ensuring components only re-render when their selected data actually changes.
 
----
-
 ## Getting Started
 
 Start by installing the package via your preferred package manager:
@@ -19,8 +17,6 @@ or, if using pnpm:
 ```sh
 pnpm add react-ctx-selector
 ```
-
----
 
 ## ☕ 60-Second TL;DR
 
@@ -88,8 +84,6 @@ export default function Demo() {
   )
 }
 ```
-
----
 
 ## API Reference
 
@@ -177,8 +171,6 @@ import { useContext } from 'react-ctx-selector';
 const entireContext = useContext(MyContext);
 ```
 
----
-
 ## 🎯 Best Practices
 
 ### Separate Provider State to Prevent Children Re-renders
@@ -234,8 +226,6 @@ function App() {
 - When the Provider's state is managed in the same component as other UI logic, any re-render of that component will also re-render all Provider children
 - By separating the Provider into its own component, you isolate the context state management from other rendering triggers
 - This pattern works perfectly with `useContextSelector` to provide maximum performance optimization
-
----
 
 ## ❓ FAQ
 
