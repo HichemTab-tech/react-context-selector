@@ -8,13 +8,16 @@ import React, {
 } from "react";
 import isEqual from "react-fast-compare";
 
+type ValueOrSetter<T> = T | ((prev: T) => T);
+
 function createContextStore<T>(initialValue: T) {
     let value = initialValue;
     let listeners = new Set<() => void>();
     return {
         get: () => value,
-        set: (newValue: T) => {
-            value = newValue;
+        set: (newValue: ValueOrSetter<T>) => {
+            if (typeof newValue === 'function') value = (newValue as (prev: T) => T)(value);
+            else value = newValue;
             listeners.forEach(l => l());
         },
         subscribe: (callback: () => void) => {
@@ -29,12 +32,22 @@ function createContextStore<T>(initialValue: T) {
 export type MyContextType<V> = {
     Provider: (props: PropsWithChildren<{value: V}>) => ReactNode;
     MyContext: C<ReturnType<typeof createContextStore<V>>>;
+    setter: (v: ValueOrSetter<V>) => void;
 }
 
+const err = {
+    error: "Value can't be a function",
+} as const;
+
 // noinspection JSUnusedGlobalSymbols
-export function createContext<V>(initialValue: V): MyContextType<V> {
+export function createContext<V>(initialValue: V extends Function ? typeof err: V): MyContextType<V> {
     const MyContext = cC<ReturnType<typeof createContextStore<V>>>(undefined as unknown as ReturnType<typeof createContextStore<V>>);
-    const Context = cC<V>(initialValue);
+    const Context = cC<V>(initialValue as V);
+
+    let set = null as ((v: ValueOrSetter<V>) => void)|null;
+    const setter = (v: Parameters<NonNullable<typeof set>>[0]) => {
+        set?.(v);
+    }
 
     return {
         Provider: function Provider({children, value}: Omit<ComponentProps<typeof Context.Provider>, 'value'> & {value: V}) {
@@ -46,8 +59,17 @@ export function createContext<V>(initialValue: V): MyContextType<V> {
                 store.set(value);
             }, [value, store]);
 
+            useEffect(() => {
+                set = store.set;
+
+                return () => {
+                    set = null;
+                }
+            }, [store]);
+
             return <MyContext.Provider value={store}>{children}</MyContext.Provider>
         },
+        setter,
         MyContext,
     } as const;
 }
