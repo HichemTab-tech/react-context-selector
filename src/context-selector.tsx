@@ -8,13 +8,18 @@ import React, {
 } from "react";
 import isEqual from "react-fast-compare";
 
+type ValueOrSetter<T> = T | ((prev: T) => T);
+
+type StoreType<T> = ReturnType<typeof createContextStore<T>>;
+
 function createContextStore<T>(initialValue: T) {
     let value = initialValue;
     let listeners = new Set<() => void>();
     return {
         get: () => value,
-        set: (newValue: T) => {
-            value = newValue;
+        set: (newValue: ValueOrSetter<T>) => {
+            if (typeof newValue === 'function') value = (newValue as (prev: T) => T)(value);
+            else value = newValue;
             listeners.forEach(l => l());
         },
         subscribe: (callback: () => void) => {
@@ -28,13 +33,17 @@ function createContextStore<T>(initialValue: T) {
 
 export type MyContextType<V> = {
     Provider: (props: PropsWithChildren<{value: V}>) => ReactNode;
-    MyContext: C<ReturnType<typeof createContextStore<V>>>;
+    MyContext: C<StoreType<V>>;
 }
 
+const err = {
+    error: "Value can't be a function",
+} as const;
+
 // noinspection JSUnusedGlobalSymbols
-export function createContext<V>(initialValue: V): MyContextType<V> {
-    const MyContext = cC<ReturnType<typeof createContextStore<V>>>(undefined as unknown as ReturnType<typeof createContextStore<V>>);
-    const Context = cC<V>(initialValue);
+export function createContext<V>(initialValue: V extends Function ? typeof err: V): MyContextType<V> {
+    const MyContext = cC<StoreType<V>>(undefined as unknown as StoreType<V>);
+    const Context = cC<V>(initialValue as V);
 
     return {
         Provider: function Provider({children, value}: Omit<ComponentProps<typeof Context.Provider>, 'value'> & {value: V}) {
@@ -85,4 +94,21 @@ export function useContextSelector<V, T = V>(
     };
     const serverGetter = useCallback(() => cachedValue.current, []);
     return useSyncExternalStore(myContext.subscribe, getter, serverGetter)
+}
+
+export function useContextStore<V>(
+    context: MyContextType<V>,
+    noContextCallback?: NoContextCallback
+): StoreType<V> {
+    const myContext = React.useContext(context.MyContext);
+    if (!noContextCallback) {
+        noContextCallback = () => {
+            throw new Error("useContextStore must be used inside Context.Provider")
+        };
+    }
+    if (!myContext) {
+        noContextCallback();
+    }
+
+    return myContext;
 }
