@@ -1,5 +1,11 @@
-import {createContext, type MyContextType as Context, useContextSelector} from "./context-selector";
+import {
+    createContext,
+    type MyContextType as Context,
+    useContextSelector,
+    useContextStore as useCtxStore
+} from "./context-selector";
 import {type PropsWithChildren, type FC} from "react";
+import type {StoreType} from "./context-selector";
 
 export interface QuickContextProviderProps<ContextDataType> {
     data: ContextDataType
@@ -8,7 +14,8 @@ export interface QuickContextProviderProps<ContextDataType> {
 export type DefaultResult<ContextDataType> = {
     QuickContext: Context<ContextDataType>,
     QuickContextProvider: (props: PropsWithChildren<QuickContextProviderProps<ContextDataType>>) => FC<PropsWithChildren<QuickContextProviderProps<ContextDataType>>>,
-    useQuickContext: <T>(selector?: (value: ContextDataType) => T) => T extends ContextDataType ? ContextDataType : T
+    useQuickContext: <T>(selector?: (value: ContextDataType) => T) => T extends ContextDataType ? ContextDataType : T,
+    useQuickContextStore: () => StoreType<ContextDataType>
 }
 
 export type NamedResult<ContextDataType, Name extends string> = {
@@ -17,11 +24,14 @@ export type NamedResult<ContextDataType, Name extends string> = {
     [K in `${Capitalize<Name>}ContextProvider`]: FC<PropsWithChildren<QuickContextProviderProps<ContextDataType>>>
 } & {
     [K in `use${Capitalize<Name>}Context`]: <T>(selector?: (value: ContextDataType) => T) => T extends ContextDataType ? ContextDataType : T
+} & {
+    [K in `use${Capitalize<Name>}ContextStore`]: () => StoreType<ContextDataType>
 };
 
 export interface Options<Name extends string>{
     name?: Name
 }
+
 
 export type QuickContextFactoryType<ContextDataType> = {
     create<Name extends string>(options: Options<Name>): NamedResult<ContextDataType, Name>;
@@ -72,10 +82,17 @@ function createQuickContext<ContextDataType, Name extends string>(name: Name) {
         return context as T extends ContextDataType ? ContextDataType : T;
     }
 
+    function useQuickContextStore(): StoreType<ContextDataType> {
+        return useCtxStore(QuickContext as unknown as Context<ContextDataType>, () => {
+            throw new Error(`use${name}ContextStore must be used within a ${name}ContextProvider`);
+        });
+    }
+
     const result = {
         [`${name}Context`]: QuickContext,
         [`${name}ContextProvider`]: QuickContextProvider,
         [`use${name}Context`]: useQuickContext,
+        [`use${name}ContextStore`]: useQuickContextStore,
     };
 
     return result as any;
