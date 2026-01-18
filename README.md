@@ -171,6 +171,93 @@ import { useContext } from 'react-ctx-selector';
 const entireContext = useContext(MyContext);
 ```
 
+### `quickContextFactory<ContextDataType>()`
+
+A utility that provides a `create` method to simplify the creation of a context, provider, and hook. It's a quick way to set up a context without boilerplate, with type inference for the returned objects.
+
+**Returns:**
+
+An object with a `create` method.
+
+#### `create(options?)`
+
+**Parameters:**
+
+| Parameter | Type                | Description                                                                                                                                                              |
+|-----------|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `options` | `{ name?: string }` | Optional configuration. `name` is used to generate the names of the returned context, provider, and hook (e.g., `name: 'Shared'` results in `SharedContext`, `SharedContextProvider`, and `useSharedContext`). |
+
+**Returns:**
+
+- If `name` is **not** provided, an object containing:
+    - `QuickContext`: The created React context.
+    - `QuickContextProvider`: A provider component.
+    - `useQuickContext`: A hook to access the context value.
+- If `name` **is** provided (e.g., `'Shared'`), an object containing:
+    - `SharedContext`: The created React context.
+    - `SharedContextProvider`: A provider component.
+    - `useSharedContext`: A hook to access the context value.
+
+**Example (Default):**
+
+```tsx
+import { quickContextFactory } from 'react-ctx-selector';
+
+// 1. Create the context
+const { QuickContextProvider, useQuickContext } = quickContextFactory<{
+  user: { name: string; age: number };
+  theme: string;
+}>().create();
+
+// 2. Use the provider
+function App() {
+  const data = {
+    user: { name: 'Hichem', age: 25 },
+    theme: 'dark',
+  };
+
+  return (
+    <QuickContextProvider data={data}>
+      <UserProfile />
+    </QuickContextProvider>
+  );
+}
+
+// 3. Consume context with the hook
+function UserProfile() {
+  const user = useQuickContext((state) => state.user);
+  return <div>Hello, {user.name}!</div>;
+}
+```
+
+**Example (With Name):**
+
+```tsx
+import { quickContextFactory } from 'react-ctx-selector';
+
+// 1. Create the context with a name
+const { SharedContextProvider, useSharedContext } = quickContextFactory<{
+  user: { name: string; age: number };
+}>().create({ name: 'Shared' });
+
+// 2. Use the provider
+function App() {
+  const data = { user: { name: 'Hichem', age: 25 } };
+
+  return (
+    <SharedContextProvider data={data}>
+      <UserProfile />
+    </SharedContextProvider>
+  );
+}
+
+// 3. Consume context with the named hook
+function UserProfile() {
+  const user = useSharedContext((state) => state.user);
+  return <div>Hello, {user.name}!</div>;
+}
+```
+
 ## 🎯 Best Practices
 
 ### Separate Provider State to Prevent Children Re-renders
