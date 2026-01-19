@@ -1,8 +1,8 @@
 import React, {
     type ComponentProps,
     type Context as C,
-    createContext as cC, type PropsWithChildren, type ReactNode, useCallback,
-    useEffect,
+    createContext as cC, type PropsWithChildren, type ReactNode, type RefObject, useCallback,
+    useEffect, useImperativeHandle,
     useMemo, useRef,
     useSyncExternalStore
 } from "react";
@@ -34,6 +34,7 @@ function createContextStore<T>(initialValue: T) {
 export type MyContextType<V> = {
     Provider: (props: PropsWithChildren<{value: V}>) => ReactNode;
     MyContext: C<StoreType<V>>;
+    useRef: () => RefObject<V>;
 }
 
 const err = {
@@ -46,7 +47,7 @@ export function createContext<V>(initialValue: V extends Function ? typeof err: 
     const Context = cC<V>(initialValue as V);
 
     return {
-        Provider: function Provider({children, value}: Omit<ComponentProps<typeof Context.Provider>, 'value'> & {value: V}) {
+        Provider: function Provider({children, value, ref}: Omit<ComponentProps<typeof Context.Provider>, 'value'> & {value: V, ref?: RefObject<StoreType<V>>}) {
             const store = useMemo(() => {
                 return createContextStore(value);
             }, []);
@@ -55,9 +56,14 @@ export function createContext<V>(initialValue: V extends Function ? typeof err: 
                 store.set(value);
             }, [value, store]);
 
+            useImperativeHandle(ref, () => {
+                return store;
+            }, []);
+
             return <MyContext.Provider value={store}>{children}</MyContext.Provider>
         },
         MyContext,
+        useRef: () => useRef<V>(undefined!)
     } as const;
 }
 
