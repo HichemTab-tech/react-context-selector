@@ -42,7 +42,7 @@
   "homepage": "https://github.com/HichemTab-tech/react-context-selector#readme",
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.13",
-    "@types/node": "^24.5.2",
+    "@types/node": "^25.0.9",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react": "^5.0.3",
