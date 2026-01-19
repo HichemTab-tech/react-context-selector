@@ -4,12 +4,10 @@ import {
     useContextSelector,
     useContextStore as useCtxStore
 } from "./context-selector";
-import {type PropsWithChildren, type FC} from "react";
+import {type PropsWithChildren, type FC, type ComponentProps} from "react";
 import type {StoreType} from "./context-selector";
 
-export interface QuickContextProviderProps<ContextDataType> {
-    data: ContextDataType
-}
+type QuickContextProviderProps<ContextDataType> = Omit<ComponentProps<ReturnType<typeof createContext<ContextDataType>>['Provider']>, "value"> & {data: ContextDataType}
 
 export type DefaultResult<ContextDataType> = {
     QuickContext: Context<ContextDataType>,
@@ -60,11 +58,9 @@ export function quickContextFactory<ContextDataType>() {
 function createQuickContext<ContextDataType, Name extends string>(name: Name) {
 
     const QuickContext = createContext<ContextDataType>(undefined!);
-    const QuickContextProvider = ({children, data}: PropsWithChildren<QuickContextProviderProps<ContextDataType>>) => {
+    const QuickContextProvider = ({data, ...props}: PropsWithChildren<QuickContextProviderProps<ContextDataType>>) => {
         return (
-            <QuickContext.Provider value={data}>
-                {children}
-            </QuickContext.Provider>
+            <QuickContext.Provider value={data} {...props}/>
         );
     }
 
