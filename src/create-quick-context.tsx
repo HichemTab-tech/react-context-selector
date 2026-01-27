@@ -21,7 +21,7 @@ export type NamedResult<ContextDataType, Name extends string> = {
 } & {
     [K in `${Capitalize<Name>}ContextProvider`]: FC<PropsWithChildren<QuickContextProviderProps<ContextDataType>>>
 } & {
-    [K in `use${Capitalize<Name>}Context`]: <T>(selector?: (value: ContextDataType) => T) => T extends ContextDataType ? ContextDataType : T
+    [K in `use${Capitalize<Name>}Context`]: <T = ContextDataType>(selector?: (value: ContextDataType) => T) => T extends ContextDataType ? ContextDataType : T
 } & {
     [K in `use${Capitalize<Name>}ContextStore`]: () => StoreType<ContextDataType>
 };
@@ -37,6 +37,7 @@ export type QuickContextFactoryType<ContextDataType> = {
     create<Name extends string>(options?: Options<Name>): DefaultResult<ContextDataType> | NamedResult<ContextDataType, Name>;
 }
 
+// noinspection JSUnusedGlobalSymbols
 export function quickContextFactory<ContextDataType>() {
 
     return {
@@ -65,12 +66,13 @@ function createQuickContext<ContextDataType, Name extends string>(name: Name) {
     }
 
     function useQuickContext<T>(
-        selector?: (value: ContextDataType) => T
+        selector?: (value: ContextDataType) => T,
+        compareUsing?: (a: T, b: T) => boolean
     ): T extends ContextDataType ? ContextDataType : T {
         const context = useContextSelector<ContextDataType, T>(
             QuickContext as unknown as Context<ContextDataType>,
             selector ?? ((value) => value as unknown as T),
-            undefined,
+            compareUsing,
             () => {
                 throw new Error(`use${name}Context must be used within a ${name}ContextProvider`);
             }
