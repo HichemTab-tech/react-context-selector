@@ -11,8 +11,8 @@ type QuickContextProviderProps<ContextDataType> = Omit<ComponentProps<ReturnType
 
 export type DefaultResult<ContextDataType> = {
     QuickContext: Context<ContextDataType>,
-    QuickContextProvider: (props: PropsWithChildren<QuickContextProviderProps<ContextDataType>>) => FC<PropsWithChildren<QuickContextProviderProps<ContextDataType>>>,
-    useQuickContext: <T>(selector?: (value: ContextDataType) => T) => T extends ContextDataType ? ContextDataType : T,
+    QuickContextProvider: FC<PropsWithChildren<QuickContextProviderProps<ContextDataType>>>,
+    useQuickContext: <T = ContextDataType>(selector?: (value: ContextDataType) => T) => T extends ContextDataType ? ContextDataType : T,
     useQuickContextStore: () => StoreType<ContextDataType>
 }
 
