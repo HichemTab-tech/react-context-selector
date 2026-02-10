@@ -27,7 +27,8 @@ export type NamedResult<ContextDataType, Name extends string> = {
 };
 
 export interface Options<Name extends string>{
-    name?: Name
+    name?: Name,
+    compareUsing?: ((a: any, b: any) => boolean)|"isObject"
 }
 
 
@@ -51,12 +52,14 @@ export function quickContextFactory<ContextDataType>() {
 
             const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
 
-            return createQuickContext<ContextDataType, typeof capitalizedName>(capitalizedName);
+            const {name:_, ...rest} = options ?? {};
+
+            return createQuickContext<ContextDataType, typeof capitalizedName>(capitalizedName, rest);
         }
     } as QuickContextFactoryType<ContextDataType>
 }
 
-function createQuickContext<ContextDataType, Name extends string>(name: Name) {
+function createQuickContext<ContextDataType, Name extends string>(name: Name, options: Omit<Options<any>, 'name'>) {
 
     const QuickContext = createContext<ContextDataType>(undefined!);
     const QuickContextProvider = ({data, ...props}: PropsWithChildren<QuickContextProviderProps<ContextDataType>>) => {
@@ -69,10 +72,17 @@ function createQuickContext<ContextDataType, Name extends string>(name: Name) {
         selector?: (value: ContextDataType) => T,
         compareUsing?: (a: T, b: T) => boolean
     ): T extends ContextDataType ? ContextDataType : T {
+        let cu: ((a: T, b: T) => boolean)|undefined = undefined;
+        if (typeof options.compareUsing === "function") {
+            cu = options.compareUsing;
+        }
+        else if (options.compareUsing === "isObject") {
+            cu = (a, b) => Object.is(a, b);
+        }
         const context = useContextSelector<ContextDataType, T>(
             QuickContext as unknown as Context<ContextDataType>,
             selector ?? ((value) => value as unknown as T),
-            compareUsing,
+            compareUsing??cu,
             () => {
                 throw new Error(`use${name}Context must be used within a ${name}ContextProvider`);
             }
