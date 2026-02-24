@@ -219,9 +219,13 @@ An object with a `create` method.
 
 **Parameters:**
 
-| Parameter | Type                | Description                                                                                                                                                              |
-|-----------|---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `options` | `{ name?: string }` | Optional configuration. `name` is used to generate the names of the returned context, provider, and hook (e.g., `name: 'Shared'` results in `SharedContext`, `SharedContextProvider`, and `useSharedContext`). |
+| Parameter      | Type                                                | Description                                                                                                                                                                     |
+|----------------|-----------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `name`         | `string`                                            | Optional name used to generate the returned context/provider/hook identifiers (e.g., `name: 'Shared'` results in `SharedContext`, `SharedContextProvider`, `useSharedContext`). |
+| `defaultValue` | `ContextDataType`                                   | Optional fallback value. When provided, `QuickContextProvider`'s `data` prop becomes optional and the returned hooks infer their value type from this default.                  |
+| `compareUsing` | `(prev: any, next: any) => boolean` or `"isObject"` | Optional comparison strategy passed to `useContextSelector`. Use `"isObject"` to fall back to `Object.is`.                                                                      |
+
+> **Note:** If you provide `defaultValue`, you can skip the `data` prop when rendering the provider—the default will be used instead.
 
 **Returns:**
 
@@ -271,6 +275,36 @@ function UserProfile() {
 function ThemeChanger() {
     const store = useQuickContextStore();
     return <button onClick={() => store.set(s => ({...s, theme: s.theme === 'dark' ? 'light' : 'dark'}))}>Toggle Theme</button>
+}
+
+```
+
+**Example (With `defaultValue` fallback):**
+
+```tsx
+import { quickContextFactory } from 'react-ctx-selector';
+
+const initialSettings = {
+  user: { name: 'Offline', age: 0 },
+  theme: 'dark',
+} as const;
+
+const { QuickContextProvider, useQuickContext } = quickContextFactory().create({
+  defaultValue: initialSettings,
+});
+
+function App() {
+  // data prop is optional now, defaultValue is used automatically
+  return (
+    <QuickContextProvider>
+      <UserProfile />
+    </QuickContextProvider>
+  );
+}
+
+function UserProfile() {
+  const user = useQuickContext((context) => context.user);
+  return <div>Hello, {user.name}!</div>;
 }
 ```
 
