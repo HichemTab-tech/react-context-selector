@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import isEqual from "react-fast-compare";
 
-type ValueOrSetter<T> = T | ((prev: T) => T);
+type ValueOrSetter<T> = T | ((prev: T) => T) | ((prev: T) => void);
 
 export type StoreType<T> = ReturnType<typeof createContextStore<T>>;
 
@@ -18,7 +18,12 @@ function createContextStore<T>(initialValue: T) {
     return {
         get: () => value,
         set: (newValue: ValueOrSetter<T>) => {
-            if (typeof newValue === 'function') value = (newValue as (prev: T) => T)(value);
+            if (typeof newValue === 'function') {
+                const setterResult = (newValue as (((prev: T) => T) | ((prev: T) => void)))(value);
+                if (setterResult !== undefined) {
+                    value = setterResult
+                }
+            }
             else value = newValue;
             listeners.forEach(l => l());
         },
