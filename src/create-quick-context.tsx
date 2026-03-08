@@ -27,9 +27,7 @@ export type NamedResult<ContextDataType, Name extends string, RequiresData exten
 } & {
     [K in `${Capitalize<Name>}ContextProvider`]: FC<PropsWithChildren<QuickContextProviderProps<ContextDataType, RequiresData>>>
 } & {
-    [K in `use${Capitalize<Name>}Context`]: <T = ContextDataType>(selector: (value: ContextDataType) => T) => T extends ContextDataType ? ContextDataType : T
-} & {
-    [K in `use${Capitalize<Name>}Context`]: () => ContextDataType
+    [K in `use${Capitalize<Name>}Context`]: <T = ContextDataType>(selector?: (value: ContextDataType) => T) => T extends ContextDataType ? ContextDataType : T
 } & {
     [K in `use${Capitalize<Name>}ContextStore`]: () => StoreType<ContextDataType>
 };
