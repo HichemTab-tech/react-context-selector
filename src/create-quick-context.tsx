@@ -18,7 +18,7 @@ type QuickContextProviderProps<ContextDataType, RequiresData extends boolean = t
 export type DefaultResult<ContextDataType, RequiresData extends boolean = true> = {
     QuickContext: Context<ContextDataType>,
     QuickContextProvider: FC<PropsWithChildren<QuickContextProviderProps<ContextDataType, RequiresData>>>,
-    useQuickContext: <T = ContextDataType>(selector?: (value: ContextDataType) => T) => T extends ContextDataType ? ContextDataType : T,
+    useQuickContext: <T = ContextDataType>(selector?: (value: ContextDataType) => T) => [T] extends [ContextDataType] ? ContextDataType : T,
     useQuickContextStore: () => StoreType<ContextDataType>
 }
 
@@ -27,7 +27,7 @@ export type NamedResult<ContextDataType, Name extends string, RequiresData exten
 } & {
     [K in `${Capitalize<Name>}ContextProvider`]: FC<PropsWithChildren<QuickContextProviderProps<ContextDataType, RequiresData>>>
 } & {
-    [K in `use${Capitalize<Name>}Context`]: <T = ContextDataType>(selector?: (value: ContextDataType) => T) => T extends ContextDataType ? ContextDataType : T
+    [K in `use${Capitalize<Name>}Context`]: <T = ContextDataType>(selector?: (value: ContextDataType) => T) => [T] extends [ContextDataType] ? ContextDataType : T
 } & {
     [K in `use${Capitalize<Name>}ContextStore`]: () => StoreType<ContextDataType>
 };
@@ -112,7 +112,7 @@ function createQuickContext<ContextDataType, Name extends string, OptionsType ex
     function useQuickContext<T>(
         selector?: (value: ContextDataType) => T,
         compareUsing?: (a: T, b: T) => boolean
-    ): T extends ContextDataType ? ContextDataType : T {
+    ): [T] extends [ContextDataType] ? ContextDataType : T {
         let cu: ((a: T, b: T) => boolean)|undefined = undefined;
         if (typeof options.compareUsing === "function") {
             cu = options.compareUsing;
@@ -128,7 +128,7 @@ function createQuickContext<ContextDataType, Name extends string, OptionsType ex
                 throw new Error(`use${name}Context must be used within a ${name}ContextProvider`);
             }
         );
-        return context as T extends ContextDataType ? ContextDataType : T;
+        return context as [T] extends [ContextDataType] ? ContextDataType : T;
     }
 
     function useQuickContextStore(): StoreType<ContextDataType> {
